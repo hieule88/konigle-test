@@ -1,0 +1,64 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <title>Unity Home</title>
+</head>
+<body>
+    <!-- Wrapper -->
+    <main class="wrapper">
+        <div class="wrapper-header">
+            <label>UNITY</label>
+            <hr>
+        </div>
+        <div class="wrapper-content">
+            <div class="datetime">
+                <p>{{ current_date }}</p>
+                <!-- June 2022 -->
+            </div>
+            <div class="boxes">
+                <div class="box">
+                    <p class="box-title">Email list</p>
+                    <p class="box-content">{{ emails.count }}</p>
+                </div>
+                <div class="box">
+                    <p class="box-title">New this month</p>
+                    <p class="box-content">{{ amount_new_this_month }}</p>
+                </div>
+                <div class="box">
+                    <p class="box-title">Unsubscribed</p>
+                    <p class="box-content">{{ amount_unsubscribed }}</p>
+                </div>
+            </div>
+            <div class="table">
+                <table>
+                    <tr>
+                      <th class="email-id">EMAIL ID</th>
+                      <th class="timestamp">Timestamp</th>
+                      <th class="status">Status</th>
+                    </tr>
+                    {% for email in emails %}
+                        <tr>
+                            <td>{{ email.email }}</td>
+                            <td>{{ email.created_at | naturaltime }}</td>
+                            <td>{% if email.status is 1 %} Subscribed {% else %} Unsubscribed {% endif %}</td>
+                        </tr>
+                    {% endfor %}
+                    <!-- empty -->
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                      </tr>
+                  </table>
+            </div>
+        </div>
+    </main>
+    <!-- Wrapper end -->
+</body>
+</html>

@@ -1,0 +1,251 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email subscription analysis</title>
+
+    <style>
+        html,
+        body,
+        div,
+        span,
+        applet,
+        object,
+        iframe,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        p,
+        blockquote,
+        pre,
+        a,
+        abbr,
+        acronym,
+        address,
+        big,
+        cite,
+        code,
+        del,
+        dfn,
+        em,
+        img,
+        ins,
+        kbd,
+        q,
+        s,
+        samp,
+        small,
+        strike,
+        strong,
+        sub,
+        sup,
+        tt,
+        var,
+        b,
+        u,
+        i,
+        center,
+        dl,
+        dt,
+        dd,
+        ol,
+        ul,
+        li,
+        fieldset,
+        form,
+        label,
+        legend,
+        table,
+        caption,
+        tbody,
+        tfoot,
+        thead,
+        tr,
+        th,
+        td,
+        article,
+        aside,
+        canvas,
+        details,
+        embed,
+        figure,
+        figcaption,
+        footer,
+        header,
+        hgroup,
+        menu,
+        nav,
+        output,
+        ruby,
+        section,
+        summary,
+        time,
+        mark,
+        audio,
+        video {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            font-size: 100%;
+        }
+
+        html * {
+            color: #000;
+            font-family: 'Inter';
+            box-sizing: border-box;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        /* Main */
+        .wrapper {
+            width: 100%;
+            max-width: 680px;
+            margin: 0 auto;
+            margin-top: 22px;
+            margin-bottom: 12px;
+        }
+
+        .wrapper-content .datetime {
+            font-size: 24px;
+            line-height: 29px;
+            margin-bottom: 19px;
+        }
+
+        /* wrapper boxes */
+        .wrapper-content .boxes {
+            display: flex;
+            margin-bottom: 39px;
+        }
+
+        .wrapper-content .box {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 173px;
+            height: 83px;
+            background: #D9D9D9;
+            border: 1px solid #000000;
+        }
+
+        .wrapper-content .box:nth-child(1) {
+            margin-right: 64px;
+        }
+
+        .wrapper-content .box:nth-child(2) {
+            margin-right: 51px;
+        }
+
+        .wrapper-content .box-title {
+            font-size: 12px;
+            line-height: 15px;
+            margin: 10px 0 0 12px;
+        }
+
+        .wrapper-content .box-content {
+            font-size: 24px;
+            line-height: 29px;
+            margin: 0 0 12px 12px;
+        }
+
+        /* table */
+        .wrapper .table table {
+            width: 100%;
+            font-size: 12px;
+            border-top: 1px solid;
+            border-left: 0;
+            border-right: 0;
+            border-bottom: 0;
+        }
+
+        .wrapper .table th {
+            padding: 8px 0;
+        }
+
+        .wrapper .table td {
+            padding: 16px;
+        }
+
+        .wrapper .table td,
+        .wrapper .table th {
+            font-weight: normal;
+            border: 1px solid;
+        }
+
+        .wrapper .table td:nth-child(1) {
+            border-left: 0;
+        }
+
+        .wrapper .table th:nth-child(1) {
+            border-left: 0;
+        }
+
+        .wrapper .table td:nth-last-child(1) {
+            border-right: 0;
+        }
+
+        .wrapper .table th:nth-last-child(1) {
+            border-right: 0;
+        }
+
+        .wrapper .table tr:nth-last-child(1) td {
+            border-bottom: 0;
+        }
+
+        .wrapper .table .email-id {
+            width: 25%;
+        }
+
+        .wrapper .table .timestamp {
+            width: 45%;
+        }
+
+        .wrapper .table .status {
+            width: 30%;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Wrapper -->
+    <main class="wrapper">
+        <div class="wrapper-header">
+            <label>UNITY</label>
+            <hr>
+        </div>
+        <div class="wrapper-content">
+            <div class="datetime">
+                <p>{{ current_date }}</p>
+                <!-- June 2022 -->
+            </div>
+            <div class="boxes">
+                <div class="box">
+                    <p class="box-title">Email list</p>
+                    <p class="box-content">{{ emails.count }}</p>
+                </div>
+                <div class="box">
+                    <p class="box-title">New this month</p>
+                    <p class="box-content">{{ amount_new_this_month }}</p>
+                </div>
+                <div class="box">
+                    <p class="box-title">Unsubscribed</p>
+                    <p class="box-content">{{ amount_unsubscribed }}</p>
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- Wrapper end -->
+</body>
+
+</html>
