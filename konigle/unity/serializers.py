@@ -9,7 +9,7 @@ from rest_framework.exceptions import APIException
 from rest_framework import status
 
 # models
-from .models import VisitorEmail, Seller, User
+from .models import CustomerEmail, ShopOwner, User
 
 # services
 from konigle.services import get_token
@@ -30,29 +30,29 @@ class MyMessage(APIException):
 # User ================================================================
 
 
-class VisitorEmailSerializer(serializers.ModelSerializer):
+class CustomerEmailSerializer(serializers.ModelSerializer):
     class Meta:
-        model = VisitorEmail
+        model = CustomerEmail
         fields = "__all__"
 
 
-class VisitorEmailCreateSerializer(serializers.ModelSerializer):
+class CustomerEmailCreateSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True)
 
     class Meta:
-        model = VisitorEmail
+        model = CustomerEmail
         fields = ("email",)
 
     def create(self):
-        visitor_email_create = VisitorEmail.objects.create(
-            seller=self.context.get("request").user.seller,
+        visitor_email_create = CustomerEmail.objects.create(
+            shop_owner=self.context.get("request").user.shop_owner,
             email=self.validated_data["email"],
         )
         return visitor_email_create
 
     def validate_email(self, value):
-        if VisitorEmail.objects.filter(
-            seller=self.context.get("request").user.seller,
+        if CustomerEmail.objects.filter(
+            shop_owner=self.context.get("request").user.shop_owner,
             email=value,
         ).exists():
             raise serializers.ValidationError(
@@ -85,13 +85,13 @@ class AuthSerializer(serializers.ModelSerializer):
             )
 
 
-class SellerSerializer(serializers.ModelSerializer):
+class ShopOwnerSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Seller
+        model = ShopOwner
         fields = "__all__"
 
 
-class SellerCreateSerializer(serializers.ModelSerializer):
+class ShopOwnerCreateSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True)
     password = serializers.CharField(
         required=True,
@@ -104,7 +104,7 @@ class SellerCreateSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = Seller
+        model = ShopOwner
         fields = (
             "email",
             "password",
@@ -113,7 +113,7 @@ class SellerCreateSerializer(serializers.ModelSerializer):
     def validate_email(self, value):
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError(
-                "A seller with this email already exists!"
+                "A shop_owner with this email already exists!"
             )
         return value
 
@@ -121,8 +121,8 @@ class SellerCreateSerializer(serializers.ModelSerializer):
         user = User.objects.create(email=self.validated_data["email"])
         user.set_password(self.validated_data["password"])
         user.save()
-        # Entry seller
-        seller = Seller.objects.create(user=user)
-        seller.save()
+        # Entry shop_owner
+        shop_owner = ShopOwner.objects.create(user=user)
+        shop_owner.save()
 
-        return seller
+        return shop_owner

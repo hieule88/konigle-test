@@ -23,7 +23,7 @@ from unity import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('unity.urls')),
-    path('', views.unity_home)
+    path('', views.index)
 ] 
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

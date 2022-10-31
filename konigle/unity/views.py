@@ -1,4 +1,5 @@
 import email
+from venv import create
 
 from django.shortcuts import render, get_object_or_404
 import datetime
@@ -11,14 +12,13 @@ from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 
-from .models import VisitorEmail, Seller
+from .models import CustomerEmail, Seller
 from .serializers import (
-    VisitorEmailSerializer,
-    VisitorEmailCreateSerializer,
+    CustomerEmailSerializer,
+    CustomerEmailCreateSerializer,
     SellerCreateSerializer,
     AuthSerializer,
 )
-from .constants.visitor_emails import VisitorEmailStatusType
 
 # Create your views here.
 import re
@@ -35,21 +35,20 @@ PAGINATE_BY = 15
 
 
 #view for user see statistic
-def unity_home(request):
-    emails = VisitorEmail.objects.all()
-    current_date = datetime.date.today().strftime("%B %Y")
-    amount_new_this_month = emails.filter(
-        created_at__month=datetime.date.today().month
-    ).count()
-    amount_unsubscribed = emails.filter(
-        status=VisitorEmailStatusType.UNSUBSCRIBED
-    ).count()
+def index(request):
+    emails = CustomerEmail.objects.all()
+    new_this_month = emails.filter(created_date__month=datetime.date.today().month, created_date__year=datetime.date.today().year)
+    unsubscribed = emails.filter(status=False)
+
+    paginator = Paginator(emails, PAGINATE_BY)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
     context = {
-        "emails": emails,
-        "current_date": current_date,
-        "amount_new_this_month": amount_new_this_month,
-        "amount_unsubscribed": amount_unsubscribed,
+        "page_obj": page_obj,
+        "total_emails": len(emails),
+        "amount_new_this_month": len(new_this_month),
+        "amount_unsubscribed": len(unsubscribed),
     }
     return render(request, "emails.html", context=context)
 
@@ -65,13 +64,13 @@ def get_mail(request):
 
     if is_valid(email_name):
         if  Email.objects.filter(name = email_name):
-            return Response({"message":"already exists"},status=409)      
+            return Response({"message":"already exists"}, status=409)      
         content = data
         email = Email(name=email_name)
         email.save()
         return Response(content,status=201)
     else:
-        return Response({"message":"email not valid"},status=400)
+        return Response({"message":"email not valid"}, status=400)
 
 @api_view(["POST"])
 def login_view(request):
@@ -109,13 +108,13 @@ class SellerViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class VisitorEmailViewSet(viewsets.ModelViewSet):
-    serializer_class = VisitorEmailSerializer
+class CustomerEmailViewSet(viewsets.ModelViewSet):
+    serializer_class = CustomerEmailSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = None
 
     def get_queryset(self):
-        queryset = VisitorEmail.objects.filter(
+        queryset = CustomerEmail.objects.filter(
             seller__user=self.request.user, seller__user__is_active=True
         )
         return queryset
@@ -145,7 +144,7 @@ class VisitorEmailViewSet(viewsets.ModelViewSet):
             )
 
     def create(self, request, *args, **kwargs):
-        serializer = VisitorEmailCreateSerializer(
+        serializer = CustomerEmailCreateSerializer(
             data=request.data, context={"request": request}
         )
         if serializer.is_valid():

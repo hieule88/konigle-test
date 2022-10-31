@@ -146,13 +146,12 @@ CORS_ALLOW_CREDENTIALS = True
 # Need debug
 # Django Json Web Token
 SIMPLE_JWT = {
-    # "ACCESS_TOKEN_LIFETIME": timedelta(
-    #     seconds=int(os.environ.get("ACCESS_TOKEN_LIFETIME"))
-    # ),
-    # "REFRESH_TOKEN_LIFETIME": timedelta(
-    #     seconds=int(os.environ.get("REFRESH_TOKEN_LIFETIME"))
-    # ),
-    'SIGNING_KEY': SECRET_KEY,
+    "ACCESS_TOKEN_LIFETIME": timedelta(
+        seconds=3600
+    ),
+    "REFRESH_TOKEN_LIFETIME": timedelta(
+        seconds=3600
+    ),
 }
 
 #Setting the Rate limiting so client cannot misuse it
