@@ -12,11 +12,11 @@ from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 
-from .models import CustomerEmail, Seller
+from .models import CustomerEmail, ShopOwner
 from .serializers import (
     CustomerEmailSerializer,
     CustomerEmailCreateSerializer,
-    SellerCreateSerializer,
+    ShopOwnerCreateSerializer,
     AuthSerializer,
 )
 
@@ -52,25 +52,6 @@ def index(request):
     }
     return render(request, "emails.html", context=context)
 
-@api_view(['POST'])
-def get_mail(request):
-    """ 
-    Validate email.
-    If it is a valid email and not exist in database, then save it into database 
-    Otherwise, response a error
-    """
-    data = request.data
-    email_name = data["email"]
-
-    if is_valid(email_name):
-        if  Email.objects.filter(name = email_name):
-            return Response({"message":"already exists"}, status=409)      
-        content = data
-        email = Email(name=email_name)
-        email.save()
-        return Response(content,status=201)
-    else:
-        return Response({"message":"email not valid"}, status=400)
 
 @api_view(["POST"])
 def login_view(request):
@@ -90,13 +71,13 @@ def logout_view(request):
     except (AttributeError, ObjectDoesNotExist):
         return Response({"message": "Bad request"}, status=status.HTTP_400_BAD_REQUEST)
 
-class SellerViewSet(viewsets.ModelViewSet):
-    serializer_class = SellerCreateSerializer
+class ShopOwnerViewSet(viewsets.ModelViewSet):
+    serializer_class = ShopOwnerCreateSerializer
     permission_classes = []
     pagination_class = None
 
     def get_queryset(self):
-        queryset = Seller.objects.filter(user__is_active=True)
+        queryset = ShopOwner.objects.filter(user__is_active=True)
         return queryset
 
     def create(self, request):
@@ -115,7 +96,7 @@ class CustomerEmailViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = CustomerEmail.objects.filter(
-            seller__user=self.request.user, seller__user__is_active=True
+            shop_owner__user=self.request.user, shop_owner__user__is_active=True
         )
         return queryset
 

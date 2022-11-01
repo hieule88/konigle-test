@@ -8,25 +8,25 @@ from .views import *
                         
 
 # Define class
-email_list = VisitorEmailViewSet.as_view({
+email_list = CustomerEmailViewSet.as_view({
     'get': 'list', # Get lists
     'post': 'create' # Create a new
 })
 
-email_detail = VisitorEmailViewSet.as_view({
+email_detail = CustomerEmailViewSet.as_view({
     'get': 'retrieve', # get detail
     # 'patch': 'update', # update
     # 'delete': 'destroy', # delete
 })
 
-seller_list = SellerViewSet.as_view({
+shop_owner_list = ShopOwnerViewSet.as_view({
     'post': 'create',
 })
 
 urlpatterns = [
     path('emails/<int:id>', email_detail, name='email_detail'),
     path('emails', email_list),
-    path('sellers', seller_list),
+    path('shop_owners', shop_owner_list),
     # auth
     path('auth/login', login_view),
     path('auth/logout', logout_view),

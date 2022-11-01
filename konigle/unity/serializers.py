@@ -1,5 +1,4 @@
 from django.contrib.auth import authenticate
-from django.db.models import Q
 from django.core.validators import RegexValidator
 
 from rest_framework import serializers
@@ -14,20 +13,8 @@ from .models import CustomerEmail, ShopOwner, User
 # services
 from konigle.services import get_token
 
-# constants
-from unity.constants.users import UserValidateType
 
-
-class MyMessage(APIException):
-    """Readers message class"""
-
-    def __init__(self, msg, attrs):
-        APIException.__init__(self, msg)
-        self.status_code = attrs.get("status_code")
-        self.message = msg
-
-
-# User ================================================================
+PASSWORD_REGEX = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
 
 
 class CustomerEmailSerializer(serializers.ModelSerializer):
@@ -46,19 +33,9 @@ class CustomerEmailCreateSerializer(serializers.ModelSerializer):
     def create(self):
         visitor_email_create = CustomerEmail.objects.create(
             shop_owner=self.context.get("request").user.shop_owner,
-            email=self.validated_data["email"],
+            email=self.s["email"],
         )
         return visitor_email_create
-
-    def validate_email(self, value):
-        if CustomerEmail.objects.filter(
-            shop_owner=self.context.get("request").user.shop_owner,
-            email=value,
-        ).exists():
-            raise serializers.ValidationError(
-                "A visitor with this email already exists!"
-            )
-        return value
 
 
 class AuthSerializer(serializers.ModelSerializer):
@@ -97,7 +74,7 @@ class ShopOwnerCreateSerializer(serializers.ModelSerializer):
         required=True,
         validators=[
             RegexValidator(
-                regex=UserValidateType.PASSWORD_REGEX,
+                regex=PASSWORD_REGEX,
                 message="Password is invalid",
             )
         ],
