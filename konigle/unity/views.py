@@ -8,15 +8,16 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.core.paginator import Paginator
 from django.core.exceptions import ObjectDoesNotExist
+from django.views import View
 
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 
-from .models import CustomerEmail, ShopOwner
+from .models import CustomerEmail
 from .serializers import (
+    ShopOwnerSerializer,
     CustomerEmailSerializer,
-    CustomerEmailCreateSerializer,
-    ShopOwnerCreateSerializer,
+    CustomerEmailAddSerializer,
     AuthSerializer,
 )
 
@@ -71,16 +72,12 @@ def logout_view(request):
     except (AttributeError, ObjectDoesNotExist):
         return Response({"message": "Bad request"}, status=status.HTTP_400_BAD_REQUEST)
 
-class ShopOwnerViewSet(viewsets.ModelViewSet):
-    serializer_class = ShopOwnerCreateSerializer
+class ShopOwnerView(View):
+    serializer_class = ShopOwnerSerializer
     permission_classes = []
     pagination_class = None
 
-    def get_queryset(self):
-        queryset = ShopOwner.objects.filter(user__is_active=True)
-        return queryset
-
-    def create(self, request):
+    def post(self, request):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             serializer.create()
@@ -89,47 +86,25 @@ class ShopOwnerViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class CustomerEmailViewSet(viewsets.ModelViewSet):
+class CustomerEmailView(View):
     serializer_class = CustomerEmailSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = None
 
-    def get_queryset(self):
-        queryset = CustomerEmail.objects.filter(
-            shop_owner__user=self.request.user, shop_owner__user__is_active=True
-        )
-        return queryset
-
-    def get_object(self):
-        return get_object_or_404(
-            self.get_queryset(),
-            pk=self.kwargs.get("id"),
-        )
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        if not queryset:
+    def get(self, request):
+        list_emails = CustomerEmail.objects.filter(shop_owner__user=self.request.user, shop_owner__user__is_active=True)
+        if not list_emails:
             return Response(
                 {"email": "Email not found"}, status=status.HTTP_404_NOT_FOUND
             )
-        serializer = self.get_serializer(queryset, many=True)
+        serializer = self.get_serializer(list_emails, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def retrieve(self, request, id=None):
-        try:
-            serializer = self.get_serializer(self.get_object())
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except:
-            return Response(
-                {"email": "Email not found"}, status=status.HTTP_404_NOT_FOUND
-            )
-
-    def create(self, request, *args, **kwargs):
-        serializer = CustomerEmailCreateSerializer(
-            data=request.data, context={"request": request}
-        )
+    
+    def post(self, request):
+        serializer = CustomerEmailAddSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
-            serializer.create()
+            serializer.add()
             return Response(
                 {"message": "Create successfully"}, status=status.HTTP_201_CREATED
             )

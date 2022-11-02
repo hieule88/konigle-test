@@ -1,13 +1,9 @@
 from django.contrib.auth import authenticate
-from django.core.validators import RegexValidator
 
 from rest_framework import serializers
-
-# custom message
 from rest_framework.exceptions import APIException
 from rest_framework import status
 
-# models
 from .models import CustomerEmail, ShopOwner, User
 
 # services
@@ -23,14 +19,14 @@ class CustomerEmailSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class CustomerEmailCreateSerializer(serializers.ModelSerializer):
+class CustomerEmailAddSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True)
 
     class Meta:
         model = CustomerEmail
         fields = ("email",)
 
-    def create(self):
+    def add(self):
         visitor_email_create = CustomerEmail.objects.create(
             shop_owner=self.context.get("request").user.shop_owner,
             email=self.s["email"],
@@ -47,7 +43,6 @@ class AuthSerializer(serializers.ModelSerializer):
         fields = ["email", "password"]
 
     def login(self, data):
-        msgError = "No active account found with the given credentials."
         try:
             user = authenticate(
                 request=self.context.get("request"),
@@ -58,7 +53,7 @@ class AuthSerializer(serializers.ModelSerializer):
             return data
         except Exception:
             raise MyMessage(
-                {"message": msgError}, {"status_code": status.HTTP_400_BAD_REQUEST}
+                {"message": "Invalid email or password"}, {"status_code": status.HTTP_400_BAD_REQUEST}
             )
 
 
@@ -66,40 +61,3 @@ class ShopOwnerSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShopOwner
         fields = "__all__"
-
-
-class ShopOwnerCreateSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(required=True)
-    password = serializers.CharField(
-        required=True,
-        validators=[
-            RegexValidator(
-                regex=PASSWORD_REGEX,
-                message="Password is invalid",
-            )
-        ],
-    )
-
-    class Meta:
-        model = ShopOwner
-        fields = (
-            "email",
-            "password",
-        )
-
-    def validate_email(self, value):
-        if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError(
-                "A shop_owner with this email already exists!"
-            )
-        return value
-
-    def create(self):
-        user = User.objects.create(email=self.validated_data["email"])
-        user.set_password(self.validated_data["password"])
-        user.save()
-        # Entry shop_owner
-        shop_owner = ShopOwner.objects.create(user=user)
-        shop_owner.save()
-
-        return shop_owner
