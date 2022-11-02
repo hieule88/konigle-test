@@ -43,15 +43,15 @@ def index(request):
 
     paginator = Paginator(emails, PAGINATE_BY)
     page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    page_paginated = paginator.get_page(page_number)
 
     context = {
-        "page_obj": page_obj,
+        "page_paginated": page_paginated,
         "total_emails": len(emails),
         "amount_new_this_month": len(new_this_month),
         "amount_unsubscribed": len(unsubscribed),
     }
-    return render(request, "emails.html", context=context)
+    return render(request, "unity/index.html", context=context)
 
 
 @api_view(["POST"])
@@ -72,7 +72,7 @@ def logout_view(request):
     except (AttributeError, ObjectDoesNotExist):
         return Response({"message": "Bad request"}, status=status.HTTP_400_BAD_REQUEST)
 
-class ShopOwnerView(View):
+class ShopOwnerView(viewsets.ModelViewSet):
     serializer_class = ShopOwnerSerializer
     permission_classes = []
     pagination_class = None
@@ -80,13 +80,13 @@ class ShopOwnerView(View):
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            serializer.create()
+            serializer.add()
             data = {"message": "Registered successfully!"}
             return Response(data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class CustomerEmailView(View):
+class CustomerEmailView(viewsets.ModelViewSet):
     serializer_class = CustomerEmailSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = None
@@ -100,12 +100,11 @@ class CustomerEmailView(View):
         serializer = self.get_serializer(list_emails, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    
     def post(self, request):
         serializer = CustomerEmailAddSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
             serializer.add()
             return Response(
-                {"message": "Create successfully"}, status=status.HTTP_201_CREATED
+                {"message": "Add successfully"}, status=status.HTTP_201_CREATED
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

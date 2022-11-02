@@ -13,6 +13,15 @@ from konigle.services import get_token
 PASSWORD_REGEX = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
 
 
+class MyMessage(APIException):
+    """Readers message class"""
+
+    def __init__(self, msg, attrs):
+        APIException.__init__(self, msg)
+        self.status_code = attrs.get("status_code")
+        self.message = msg
+
+
 class CustomerEmailSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomerEmail
@@ -27,11 +36,11 @@ class CustomerEmailAddSerializer(serializers.ModelSerializer):
         fields = ("email",)
 
     def add(self):
-        visitor_email_create = CustomerEmail.objects.create(
-            shop_owner=self.context.get("request").user.shop_owner,
-            email=self.s["email"],
+        email_add = CustomerEmail.objects.create(
+            shop_owner=self.context.get("request").user.shopowner,
+            email=self.validated_data["email"],
         )
-        return visitor_email_create
+        return email_add
 
 
 class AuthSerializer(serializers.ModelSerializer):
@@ -51,7 +60,7 @@ class AuthSerializer(serializers.ModelSerializer):
             )
             data = {"message": "Login successfully!", "result": get_token(user)}
             return data
-        except Exception:
+        except Exception as e:
             raise MyMessage(
                 {"message": "Invalid email or password"}, {"status_code": status.HTTP_400_BAD_REQUEST}
             )
@@ -61,3 +70,9 @@ class ShopOwnerSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShopOwner
         fields = "__all__"
+
+    def add(self):
+        email_added = ShopOwner.objects.create(
+            email=self.validated_data["email"],
+        )
+        return email_added

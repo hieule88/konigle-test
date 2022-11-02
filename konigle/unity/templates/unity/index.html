@@ -61,10 +61,10 @@
               </tr>
             </thead>
             <tbody>
-                {% for email in page_obj.object_list %}
+                {% for email in page_paginated.object_list %}
                     <tr>
-                        <td>{{email.name}}</td>
-                        <td>{{email.date|timesince}} ago</td>
+                        <td>{{email.email}}</td>
+                        <td>{{email.created_date|timesince}} ago</td>
                         {% if email.status %}
                         <td>Subscribed</td>
                         {% else %}

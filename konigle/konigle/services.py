@@ -5,9 +5,6 @@ from django.utils import timezone
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.settings import api_settings
 
-from unity.models import VisitorEmail
-from unity.constants.visitor_emails import VisitorEmailStatusType, VisitorEmailIsSentType
-
 
 def get_token(user):
     """Generate access token from user."""

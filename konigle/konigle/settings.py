@@ -43,8 +43,8 @@ INSTALLED_APPS = [
     'unity',
     'django_celery_beat',
     'django_celery_results',
-    "corsheaders",
-    "django.contrib.humanize",
+    'corsheaders',
+    'django.contrib.humanize',
 ]
 
 MIDDLEWARE = [
@@ -140,7 +140,7 @@ STATICFILES_DIRS = [os.path.join(PROJECT_DIR, "static")]
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOW_CREDENTIALS = True
+# CORS_ALLOW_CREDENTIALS = True
 
 # Need debug
 # Django Json Web Token
@@ -153,16 +153,12 @@ SIMPLE_JWT = {
     ),
 }
 
+# Celery settings
+CELERY_BROKER_URL = "redis://localhost:6379"
+CELERY_RESULT_BACKEND = "redis://localhost:6379"
+
 #Setting the Rate limiting so client cannot misuse it
 REST_FRAMEWORK = {
-    'DEFAULT_THROTTLE_CLASSES': [
-        'rest_framework.throttling.AnonRateThrottle',
-        'rest_framework.throttling.UserRateThrottle'
-    ],
-    'DEFAULT_THROTTLE_RATES': {
-        'anon': '5/hour',
-        'user': '5/hour'
-    },
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),

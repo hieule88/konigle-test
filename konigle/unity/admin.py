@@ -8,12 +8,12 @@ class UserAdmin(admin.ModelAdmin):
     list_display = ['email', 'first_name', 'last_name', 'is_active', 'is_superuser', 'is_staff', 'date_joined']
 admin.site.register(User, UserAdmin)
 
-class VisitorEmailAdmin(admin.ModelAdmin):
-    model = VisitorEmail
-    list_display = ['email', 'status', 'created_at']
-admin.site.register(VisitorEmail, VisitorEmailAdmin)
+class ShopOwnerAdmin(admin.ModelAdmin):
+    model = ShopOwner
+    list_display = ['user', 'created_date']
+admin.site.register(ShopOwner, ShopOwnerAdmin)
 
-class SellerAdmin(admin.ModelAdmin):
-    model = Seller
-    list_display = ['user', 'is_email_sent', 'created_at']
-admin.site.register(Seller, SellerAdmin)
+class CustomerEmailAdmin(admin.ModelAdmin):
+    model = CustomerEmail
+    list_display = ['email', 'created_date']
+admin.site.register(CustomerEmail, CustomerEmailAdmin)
