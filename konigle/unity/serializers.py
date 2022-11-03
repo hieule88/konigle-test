@@ -1,25 +1,52 @@
 from django.contrib.auth import authenticate
 
-from rest_framework import serializers
-from rest_framework.exceptions import APIException
-from rest_framework import status
+from rest_framework import serializers, status
+from rest_framework.response import Response
 
-from .models import CustomerEmail, ShopOwner, User
+from rest_framework_simplejwt.tokens import RefreshToken
 
-# services
-from konigle.services import get_token
+from .models import CustomUser, ShopOwner, CustomerEmail
 
 
-PASSWORD_REGEX = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
+def get_tokens_for_user(user):
+    refresh = RefreshToken.for_user(user)
+    return {
+        "refresh": str(refresh),
+        "access": str(refresh.access_token),
+    }
 
 
-class MyMessage(APIException):
-    """Readers message class"""
+class UserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(required=True)
+    email = serializers.CharField(required=True)
 
-    def __init__(self, msg, attrs):
-        APIException.__init__(self, msg)
-        self.status_code = attrs.get("status_code")
-        self.message = msg
+    class Meta:
+        model = CustomUser
+        fields = ["email", "password"]
+
+    def login(self, data):
+        try:
+            user = authenticate(
+                request=self.context.get("request"),
+                email=data.get("email"),
+                password=data.get("password"),
+            )
+            data = {"message": "Login successfully!", "result": get_tokens_for_user(user)}
+            return data
+        except Exception as e:
+            raise Response('Invalid Email or Password', status=status.HTTP_400_BAD_REQUEST)
+
+
+class ShopOwnerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ShopOwner
+        fields = "__all__"
+
+    def add(self):
+        email_added = ShopOwner.objects.create(
+            email=self.validated_data["email"],
+        )
+        return email_added
 
 
 class CustomerEmailSerializer(serializers.ModelSerializer):
@@ -41,38 +68,3 @@ class CustomerEmailAddSerializer(serializers.ModelSerializer):
             email=self.validated_data["email"],
         )
         return email_add
-
-
-class AuthSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(required=True)
-    email = serializers.CharField(required=True)
-
-    class Meta:
-        model = User
-        fields = ["email", "password"]
-
-    def login(self, data):
-        try:
-            user = authenticate(
-                request=self.context.get("request"),
-                email=data.get("email"),
-                password=data.get("password"),
-            )
-            data = {"message": "Login successfully!", "result": get_token(user)}
-            return data
-        except Exception as e:
-            raise MyMessage(
-                {"message": "Invalid email or password"}, {"status_code": status.HTTP_400_BAD_REQUEST}
-            )
-
-
-class ShopOwnerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ShopOwner
-        fields = "__all__"
-
-    def add(self):
-        email_added = ShopOwner.objects.create(
-            email=self.validated_data["email"],
-        )
-        return email_added
