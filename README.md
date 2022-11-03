@@ -1,9 +1,9 @@
 # Setup
 
 ## Install Enviroment
-### pip install -r requirements.txt
+pip install -r requirements.txt
 
-## Run Script
+# Run Script
 
 run command **python manage runserver**     
 
