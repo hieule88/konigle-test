@@ -21,5 +21,7 @@ from unity import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('unity/', include('unity.urls')),
+
+    # Admin Shop Owners see total new emails
     path('', views.index)
 ] 

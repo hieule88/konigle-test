@@ -25,7 +25,7 @@ def index(request):
     count_new_this_month = emails.filter(created_date__month=datetime.date.today().month, created_date__year=datetime.date.today().year).count()
     count_unsubscribed = emails.filter(status=False).count()
 
-    paginator = Paginator(emails, 10)
+    paginator = Paginator(emails, 5)
     page_number = request.GET.get('page')
     page_paginated = paginator.get_page(page_number)
 
